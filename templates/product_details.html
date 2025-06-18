@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product[1] }} - Groove Boulevard{% endblock %}
+
+{% block content %}
+<div class="product-details-container">
+    <a href="#" onclick="history.back(); return false;" class="back-btn">← Back</a>
+    
+    <!-- Add flash message container -->
+    <div id="flashMessages" class="flash-messages"></div>
+    
+    <div class="product-image-container">
+        <img src="{{ url_for('static', filename=product[4]) }}" alt="{{ product[1] }}" class="product-image">
+    </div>
+    
+    <div class="product-info-container">
+        <h1 class="product-title">{{ product[1] }}</h1>
+        <p class="product-price">₱{{ "{:,.2f}".format(product[3]|float) }}</p>
+        <p class="product-description">{{ product[2] }}</p>
+
+        <div class="product-options">
+            <div class="stock-status">
+                {% if product[7] > 0 %}
+                    <span class="in-stock">• In stock</span>
+                {% else %}
+                    <span class="out-of-stock">• Out of stock</span>
+                {% endif %}
+            </div>
+
+            <div class="quantity-selector">
+                <label>SELECT QUANTITY</label>
+                <div class="quantity-controls">
+                    <button class="quantity-btn minus">−</button>
+                    <input type="number" value="1" min="1" max="{{ product[7] }}" class="quantity-input" id="quantity">
+                    <button class="quantity-btn plus">+</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="add-to-cart-btn" onclick="addToCart({{ product[0] }})">ADD TO CART</button>
+                <button class="buy-now-btn" onclick="buyNow({{ product[0] }})">BUY NOW</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="section-divider">
+<div class="highlights-features-container">
+    {% if product[9] and product[9].strip() %}
+    <div class="highlights-section">
+        <h2 class="section-title">Highlights</h2>
+        <ul class="section-list">
+            {% for highlight in product[9].split('\n') %}
+                {% if highlight.strip() %}
+                    <li>{{ highlight.strip() }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if product[10] and product[10].strip() %}
+    <hr class="section-divider custom-divider">
+    <div class="features-section">
+        <h2 class="section-title">Specs</h2>
+        <ul class="section-list">
+            {% for feature in product[10].split('\n') %}
+                {% if feature.strip() %}
+                    <li>{{ feature.strip() }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+<hr class="section-divider">
+
+<script>
+function showFlashMessage(message, type) {
+    const flashContainer = document.getElementById('flashMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flash-message ${type}`;
+    messageDiv.textContent = message;
+    flashContainer.appendChild(messageDiv);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        setTimeout(() => messageDiv.remove(), 300);
+    }, 3000);
+}
+
+function addToCart(productId) {
+    const quantity = document.getElementById('quantity').value;
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+
+    fetch('/add-to-cart', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => {
+        if (response.status === 401) {
+            // User is not logged in
+            showFlashMessage('You need to log in first to continue with your purchase', 'error');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('login') }}";
+            }, 2000);
+            return Promise.reject('You need to log in first to continue with your purchase');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            showFlashMessage(data.error, 'error');
+        } else {
+            showFlashMessage('Product added to cart successfully!', 'success');
+        }
+    })
+    .catch(error => {
+        if (error === 'You need to log in first to continue with your purchase') {
+            // This error is handled above
+            return;
+        }
+        console.error('Error:', error);
+        showFlashMessage('An error occurred. Please try again.', 'error');
+    });
+}
+
+function buyNow(productId) {
+    const quantity = document.getElementById('quantity').value;
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+
+    fetch('/buy-now', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => {
+        if (response.status === 401) {
+            // User is not logged in
+            showFlashMessage('You need to log in first to continue with your purchase', 'error');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('login') }}";
+            }, 2000);
+            return Promise.reject('You need to log in first to continue with your purchase');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            showFlashMessage(data.error, 'error');
+        } else {
+            showFlashMessage(data.message, 'success');
+            // Wait briefly then redirect to buy-now checkout
+            setTimeout(() => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            }, 500);
+        }
+    })
+    .catch(error => {
+        if (error === 'You need to log in first to continue with your purchase') {
+            // This error is handled above
+            return;
+        }
+        console.error('Error:', error);
+        showFlashMessage('An error occurred. Please try again.', 'error');
+    });
+}
+
+// Quantity controls
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.querySelector('.quantity-input');
+    const minusBtn = document.querySelector('.minus');
+    const plusBtn = document.querySelector('.plus');
+
+    minusBtn.addEventListener('click', () => {
+        let newValue = parseInt(quantityInput.value) - 1;
+        if (newValue >= 1) {
+            quantityInput.value = newValue;
+        }
+    });
+
+    plusBtn.addEventListener('click', () => {
+        let newValue = parseInt(quantityInput.value) + 1;
+        if (newValue <= parseInt(quantityInput.max)) {
+            quantityInput.value = newValue;
+        }
+    });
+
+    quantityInput.addEventListener('change', () => {
+        let newValue = parseInt(quantityInput.value);
+        if (newValue < 1) newValue = 1;
+        if (newValue > parseInt(quantityInput.max)) newValue = parseInt(quantityInput.max);
+        quantityInput.value = newValue;
+    });
+});
+</script>
+
+<style>
+.product-details-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    gap: 4rem;
+}
+
+.product-image-container {
+    flex: 1;
+    background: #f5f5f5;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.product-info-container {
+    flex: 1;
+    padding: 1rem;
+}
+
+.product-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.product-description {
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.product-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stock-status {
+    margin: 1rem 0;
+}
+
+.in-stock {
+    color: #2ecc71;
+}
+
+.out-of-stock {
+    color: #e74c3c;
+}
+
+.quantity-selector {
+    margin: 1rem 0;
+}
+
+.quantity-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quantity-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-input {
+    width: 60px;
+    height: 40px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.add-to-cart-btn,
+.buy-now-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart-btn {
+    background-color: #333;
+    color: white;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #222;
+}
+
+.buy-now-btn {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.buy-now-btn:hover {
+    background-color: #27ae60;
+}
+
+@media (max-width: 768px) {
+    .product-details-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .button-group {
+        flex-direction: column;
+    }
+    .section-divider {
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+}
+
+.flash-message {
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+    transition: opacity 0.3s ease;
+}
+
+.flash-message.success {
+    background-color: #28a745;
+    color: white;
+}
+
+.flash-message.error {
+    background-color: #dc3545;
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.back-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    color: #333;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.3s;
+}
+
+.back-btn:hover {
+    color: #666;
+}
+
+.highlights-features-container {
+    max-width: 1200px;
+    margin: 3rem auto 3rem auto;
+    padding: 0 2rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.section-divider {
+    border: none;
+    border-top: 2px solid #888;
+    margin: 0.01rem 0 1rem 0;
+    width: 90%;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.section-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+}
+
+.section-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 2.5rem 0;
+}
+
+.section-list li {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+    padding-left: 1.2rem;
+    position: relative;
+    color: #222;
+    font-family: 'Poppins', sans-serif;
+}
+
+.section-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #222;
+    font-size: 1.1rem;
+    top: 0.1em;
+}
+
+@media (max-width: 768px) {
+    .highlights-features-container {
+        padding: 0 0.5rem;
+    }
+    .section-title {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+    }
+    .section-list li {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        padding-left: 1.2rem;
+    }
+    .section-list li:before {
+        font-size: 1.1rem;
+    }
+    .section-divider {
+        margin: 1.5rem 0 1.5rem 0;
+    }
+}
+
+/* Default style (mobile-first) */
+.custom-divider {
+  width: 100px; /* or your current width */
+  margin: 2rem auto;
+}
+
+/* Desktop view: make the line longer and centered */
+@media (min-width: 1024px) {
+  .custom-divider {
+    width: 800px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 2rem 0;
+    display: block;
+  }
+}
+
+/* Mobile view: force the line to be short */
+@media (max-width: 768px) {
+  .custom-divider {
+    width: 300px !important;
+    margin: 2rem auto !important;
+    left: unset !important;
+    transform: none !important;
+  }
+}
+</style>
+{% endblock %} 

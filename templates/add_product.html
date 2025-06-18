@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Groove Boulevard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 1rem;
+            flex-direction: row;
+        }
+
+        .admin-nav a {
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .view-products-btn {
+            background-color: #0056b3;
+        }
+
+        .view-products-btn:hover {
+            background-color: #004494;
+        }
+
+        .home-btn {
+            background-color: #28a745;
+            margin-right: 10px;
+        }
+
+        .home-btn:hover {
+            background-color: #218838;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-help {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        button[type="submit"] {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #5000c9;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flash-message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .flash-message.success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .flash-message.error {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .admin-nav {
+                flex-direction: row;
+                gap: 0.5rem;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-header">
+            <h1>Add New Product</h1>
+            <div class="admin-nav">
+                <a href="#" onclick="history.back(); return false;" class="home-btn">← Back</a>
+                <a href="{{ url_for('admin_products') }}" class="view-products-btn">View All Products</a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('add_product') }}">
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="highlights">Highlights <span style="font-weight:400;font-size:0.95em;">(one per line)</span></label>
+                <textarea id="highlights" name="highlights" rows="3" placeholder="e.g. Compact size, perfect for practice\nBuilt-in effects"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="features">Features / Specs <span style="font-weight:400;font-size:0.95em;">(one per line)</span></label>
+                <textarea id="features" name="features" rows="5" placeholder="e.g. Power: 15W\nAmp Models: 9 digital amp types\nEffects: Modulation, delay, reverb\nInputs: 1/4'' guitar input\nOutputs: Headphone out, aux in"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price (₱)</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="image_path">Image Path</label>
+                <input type="text" id="image_path" name="image_path" placeholder="e.g. images/products/guitar.jpg" required>
+                <small class="form-help">
+                    Enter the path relative to the static folder. For example:<br>
+                    • If your image is in static/images/products/guitar.jpg, enter: images/products/guitar.jpg<br>
+                    • Make sure the image file exists in the specified location<br>
+                    • Use forward slashes (/) in the path<br>
+                    • Do not include 'static/' at the start of the path
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Keyboards & Pianos">Keyboards & Pianos</option>
+                    <option value="Guitars & Accessories">Guitars & Accessories</option>
+                    <option value="Pro-Audio">Pro-Audio</option>
+                    <option value="Recording">Recording</option>
+                    <option value="Effects & Pedals">Effects & Pedals</option>
+                    <option value="Amplifiers & Effects">Amplifiers & Effects</option>
+                    <option value="Drums and Percussion">Drums and Percussion</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="brand">Brand</label>
+                <select id="brand" name="brand" required>
+                    <option value="">Select a brand</option>
+                    <option value="Alice">Alice</option>
+                    <option value="Cort">Cort</option>
+                    <option value="Dadi">Dadi</option>
+                    <option value="Fender">Fender</option>
+                    <option value="Marshall">Marshall</option>
+                    <option value="Mooer">Mooer</option>
+                    <option value="Rj">RJ</option>
+                    <option value="Yamaha">Yamaha</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                <input type="number" id="stock" name="stock" required>
+            </div>
+
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+
+    <script>
+        // Auto-hide flash messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 300);
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html> 

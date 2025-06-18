@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Brands - Groove Boulevard{% endblock %}
+
+{% block content %}
+<main class="brands-page">
+    <div class="brands-header">
+        <h1>Our Brands</h1>
+        <p>Discover our curated selection of premium musical instrument brands</p>
+    </div>
+
+    <div class="brands-grid">
+        <a href="{{ url_for('products_by_brand', brand='Marshall') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/marshall-logo.png') }}" alt="Marshall">
+            <h2>Marshall</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Fender') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/fender-logo.png') }}" alt="Fender">
+            <h2>Fender</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Yamaha') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/yamaha-logo.png') }}" alt="Yamaha">
+            <h2>Yamaha</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Mooer') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/mooer-logo.png') }}" alt="Mooer">
+            <h2>Mooer</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Cort') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/cort-logo.png') }}" alt="Cort">
+            <h2>Cort</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Dadi') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/dadi-logo.png') }}" alt="D'Addario">
+            <h2>Dadi</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Alice') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/alice-logo.png') }}" alt="Alice">
+            <h2>Alice</h2>
+        </a>
+
+        <a href="{{ url_for('products_by_brand', brand='Rj') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-card">
+            <img src="{{ url_for('static', filename='images/brands/rj-logo.png') }}" alt="Rockville">
+            <h2>RJ</h2>
+        </a>
+    </div>
+</main>
+{% endblock %} 

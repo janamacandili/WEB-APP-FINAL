@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Groove Boulevard{% endblock %}
+
+{% block content %}
+<main>
+    <!-- Add success message container at the top of main content -->
+    <div id="loginSuccessMessage" class="flash-message success" style="display: none; max-width: 1200px; margin: 1rem auto;">
+        Successfully logged in!
+    </div>
+
+    <!-- Hero Section with Carousel -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="carousel-container">
+                <div class="carousel-slide active">
+                    <img src="{{ url_for('static', filename='images/background/banner_top/banner_top1.jpg') }}" alt="Electric Guitar">
+                </div>
+                <div class="carousel-slide">
+                    <img src="{{ url_for('static', filename='images/background/banner_top/banner_top2.jpg') }}" alt="Guitar Maintenance">
+                </div>
+                <div class="carousel-slide">
+                    <img src="{{ url_for('static', filename='images/background/banner_top/banner_top3.jpg') }}" alt="Guitar Collection">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop Categories -->
+    <section class="shop-categories">
+        <h2>Shop GROOVE BOULEVARD</h2>
+        <div class="category-grid">
+            <!-- Top row -->
+            <a href="{{ url_for('products_by_category', category='Keyboards & Pianos') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/keyboards.png') }}" alt="Keyboards & Pianos">
+                <p>Keyboards & Pianos</p>
+            </a>
+            <a href="{{ url_for('products_by_category', category='Guitars & Accessories') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/guitars.png') }}" alt="Guitars">
+                <p>Guitars</p>
+            </a>
+            <a href="{{ url_for('products_by_category', category='Pro-Audio') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/pro-audio.png') }}" alt="Pro-Audio">
+                <p>Pro-Audio</p>
+            </a>
+            <a href="{{ url_for('products_by_category', category='Recording') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/recording.png') }}" alt="Recording">
+                <p>Recording</p>
+            </a>
+            <!-- Bottom row -->
+            <a href="{{ url_for('products_by_category', category='Effects & Pedals') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/effects.png') }}" alt="Effects & Pedals">
+                <p>Effects &<br>Pedals</p>
+            </a>
+            <a href="{{ url_for('products_by_category', category='Amplifiers & Effects') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/amps.png') }}" alt="Amplifiers & Effects">
+                <p>Amplifiers &<br>Effects</p>
+            </a>
+            <a href="{{ url_for('products_by_category', category='Drums and Percussion') }}{% if request.args.get('brand') %}?brand={{ request.args.get('brand') }}{% endif %}" class="category-item">
+                <img src="{{ url_for('static', filename='images/icons/drums.png') }}" alt="Drums and Percussion">
+                <p>Drums &<br>Percussion</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Guitar Banner -->
+    <section class="guitar-banner">
+        <div class="banner-container">
+            <img src="{{ url_for('static', filename='images/background/banner_down/banner_down2.jpg') }}" alt="Musical Instruments Collection">
+            <div class="banner-overlay">
+                <h2>Complete Music Studio</h2>
+                <p>From guitars to drums, find everything you need for your perfect setup</p>
+                <a href="{{ url_for('products') }}" class="banner-cta">Explore Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Brands -->
+    <section class="featured-brands">
+        <h2>Shop Featured Brands</h2>
+        <div class="brand-grid">
+            <a href="{{ url_for('products_by_brand', brand='Marshall') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/marshall-logo.png') }}" alt="Marshall">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Fender') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/fender-logo.png') }}" alt="Fender">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Yamaha') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/yamaha-logo.png') }}" alt="Yamaha">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Mooer') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/mooer-logo.png') }}" alt="Mooer">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Cort') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/cort-logo.png') }}" alt="Cort">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Dadi') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/dadi-logo.png') }}" alt="D'Addario">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Alice') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/alice-logo.png') }}" alt="Alice">
+            </a>
+            <a href="{{ url_for('products_by_brand', brand='Rj') }}{% if request.args.get('category') %}?category={{ request.args.get('category') }}{% endif %}" class="brand-link">
+                <img src="{{ url_for('static', filename='images/brands/rj-logo.png') }}" alt="Rockville">
+            </a>
+        </div>
+    </section>
+</main>
+{% endblock %}

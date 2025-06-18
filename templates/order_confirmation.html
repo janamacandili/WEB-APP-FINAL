@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmation - Groove Boulevard{% endblock %}
+
+{% block content %}
+<main class="confirmation-page">
+    <div class="confirmation-container">
+        <div class="confirmation-header">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <h1>Order Confirmed!</h1>
+            <p class="order-number">Order #{{ order[0] }}</p>
+            <p class="thank-you">Thank you for your purchase</p>
+        </div>
+
+        <div class="order-details">
+            <div class="details-section">
+                <h2>Order Details</h2>
+                <div class="details-grid">
+                    <div>
+                        <h3>Shipping Address</h3>
+                        <p>{{ order[3] }}</p>
+                    </div>
+                    <div>
+                        <h3>Contact Number</h3>
+                        <p>{{ order[4] }}</p>
+                    </div>
+                    <div>
+                        <h3>Order Date</h3>
+                        <p>{{ order[5].strftime('%B %d, %Y') }}</p>
+                    </div>
+                    <div>
+                        <h3>Order Status</h3>
+                        <p class="status {{ order[2] }}">{{ order[2].title() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-items">
+                <h2>Items Ordered</h2>
+                <div class="items-list">
+                    {% for item in order_items %}
+                    <div class="order-item">
+                        <div class="item-info">
+                            <h3>{{ item[0] }}</h3>
+                            <p class="quantity">Quantity: {{ item[1] }}</p>
+                        </div>
+                        <div class="item-price">
+                            ₱{{ "{:,.2f}".format(item[2] * item[1]|float) }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="order-total">
+                    <div class="total-row">
+                        <span>Total</span>
+                        <span>₱{{ "{:,.2f}".format(order[1]|float) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="confirmation-actions">
+            <a href="{{ url_for('products') }}" class="continue-shopping">Continue Shopping</a>
+        </div>
+    </div>
+</main>
+
+<style>
+.confirmation-page {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.confirmation-container {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.checkmark {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+}
+
+.checkmark-circle {
+    stroke: #28a745;
+    stroke-width: 2;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    stroke: #28a745;
+    stroke-width: 2;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.confirmation-header h1 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.order-number {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.thank-you {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.order-details {
+    margin: 2rem 0;
+}
+
+.details-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.details-section h2,
+.order-items h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.details-grid h3 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.details-grid p {
+    color: #333;
+}
+
+.status {
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.status.pending {
+    color: #ffc107;
+}
+
+.status.completed {
+    color: #28a745;
+}
+
+.order-items {
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.items-list {
+    margin-bottom: 1.5rem;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.quantity {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.item-price {
+    font-weight: 500;
+    color: #333;
+}
+
+.order-total {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #eee;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.confirmation-actions {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.continue-shopping {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.continue-shopping:hover {
+    background-color: #222;
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %} 

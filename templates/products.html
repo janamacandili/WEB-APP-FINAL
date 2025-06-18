@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if selected_brand %}
+        {{ selected_brand }} Products - Groove Boulevard
+    {% elif selected_category %}
+        {{ selected_category }} - Groove Boulevard
+    {% elif search_query %}
+        Search Results for "{{ search_query }}" - Groove Boulevard
+    {% else %}
+        Products - Groove Boulevard
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<main class="products-page">
+    <!-- Filter Section -->
+    <aside class="filters">
+        <h2>Filter</h2>
+        <div class="filter-section">
+            <h3>Brands</h3>
+            <!-- Mobile Filter Dropdown -->
+            <div class="mobile-brand-filter">
+                <button id="brandFilterBtn" type="button">Filter Brands</button>
+                <div id="brandDropdown" class="brand-dropdown">
+                    <a href="{{ url_for('products_by_category', category=selected_category|urlencode) if selected_category else url_for('products') }}" 
+                       class="filter-link {% if not selected_brand %}active{% endif %}">All Brands</a>
+                    {% for brand in ['Marshall', 'Fender', 'Yamaha', 'Mooer', 'Cort', 'Dadi', 'Alice', 'Rj'] %}
+                        <a href="{{ url_for('products_by_brand', brand=brand) }}{% if selected_category %}?category={{ selected_category|urlencode }}{% endif %}" 
+                           class="filter-link {% if selected_brand == brand %}active{% endif %}">
+                            {{ brand }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Desktop Filter List -->
+            <div class="filter-options desktop-brand-list">
+                <a href="{{ url_for('products_by_category', category=selected_category|urlencode) if selected_category else url_for('products') }}" 
+                   class="filter-link {% if not selected_brand %}active{% endif %}">All Brands</a>
+                {% for brand in ['Marshall', 'Fender', 'Yamaha', 'Mooer', 'Cort', 'Dadi', 'Alice', 'Rj'] %}
+                    <a href="{{ url_for('products_by_brand', brand=brand) }}{% if selected_category %}?category={{ selected_category|urlencode }}{% endif %}" 
+                       class="filter-link {% if selected_brand == brand %}active{% endif %}">
+                        {{ brand }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h3>Categories</h3>
+            <!-- Mobile Filter Dropdown for Categories -->
+            <div class="mobile-category-filter">
+                <button id="categoryFilterBtn" type="button">Filter Categories</button>
+                <div id="categoryDropdown" class="category-dropdown">
+                    <a href="{{ url_for('products_by_brand', brand=selected_brand) if selected_brand else url_for('products') }}" 
+                       class="filter-link {% if not selected_category %}active{% endif %}">All Categories</a>
+                    {% for category in ['Keyboards & Pianos', 'Guitars & Accessories', 'Pro-Audio', 'Recording', 'Effects & Pedals', 'Amplifiers & Effects', 'Drums and Percussion'] %}
+                        <a href="{{ url_for('products_by_category', category=category|urlencode) }}{% if selected_brand %}?brand={{ selected_brand }}{% endif %}" 
+                           class="filter-link {% if selected_category == category %}active{% endif %}">
+                            {{ category }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Desktop Filter List for Categories -->
+            <div class="filter-options desktop-category-list">
+                <a href="{{ url_for('products_by_brand', brand=selected_brand) if selected_brand else url_for('products') }}" 
+                   class="filter-link {% if not selected_category %}active{% endif %}">All Categories</a>
+                {% for category in ['Keyboards & Pianos', 'Guitars & Accessories', 'Pro-Audio', 'Recording', 'Effects & Pedals', 'Amplifiers & Effects', 'Drums and Percussion'] %}
+                    <a href="{{ url_for('products_by_category', category=category|urlencode) }}{% if selected_brand %}?brand={{ selected_brand }}{% endif %}" 
+                       class="filter-link {% if selected_category == category %}active{% endif %}">
+                        {{ category }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+
+    <!-- Products Grid -->
+    <section class="products-grid">
+        {% if selected_brand and selected_category %}
+            <h1 class="brand-title">{{ selected_brand }} - {{ selected_category }}</h1>
+        {% elif selected_brand %}
+            <h1 class="brand-title">{{ selected_brand }} Products</h1>
+        {% elif selected_category %}
+            <h1 class="brand-title">{{ selected_category }}</h1>
+        {% elif search_query %}
+            <h1 class="brand-title">Search Results for "{{ search_query }}"</h1>
+        {% endif %}
+        
+        {% if products %}
+            <div class="products-container">
+                {% for product in products %}
+                <a href="{{ url_for('product_details', product_id=product[0]) }}" class="product-card">
+                    <img src="{{ url_for('static', filename=product[4]) }}" alt="{{ product[1] }}">
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product[1] }}</h3>
+                        <p class="price">₱{{ "{:,.2f}".format(product[3]|float) }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination Controls -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    {% if selected_brand and selected_category %}
+                        <a href="{{ url_for('products_by_brand', brand=selected_brand) }}?category={{ selected_category|urlencode }}&page={{ current_page-1 }}" class="page-btn prev">&laquo; Previous</a>
+                    {% elif selected_brand %}
+                        <a href="{{ url_for('products_by_brand', brand=selected_brand, page=current_page-1) }}" class="page-btn prev">&laquo; Previous</a>
+                    {% elif selected_category %}
+                        <a href="{{ url_for('products_by_category', category=selected_category|urlencode, page=current_page-1) }}" class="page-btn prev">&laquo; Previous</a>
+                    {% elif search_query %}
+                        <a href="{{ url_for('products', query=search_query, page=current_page-1) }}" class="page-btn prev">&laquo; Previous</a>
+                    {% else %}
+                        <a href="{{ url_for('products', page=current_page-1) }}" class="page-btn prev">&laquo; Previous</a>
+                    {% endif %}
+                {% endif %}
+
+                <div class="page-numbers">
+                    {% for page_num in range(1, total_pages + 1) %}
+                        {% if selected_brand and selected_category %}
+                            <a href="{{ url_for('products_by_brand', brand=selected_brand) }}?category={{ selected_category|urlencode }}&page={{ page_num }}" 
+                               class="page-btn {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+                        {% elif selected_brand %}
+                            <a href="{{ url_for('products_by_brand', brand=selected_brand, page=page_num) }}" 
+                               class="page-btn {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+                        {% elif selected_category %}
+                            <a href="{{ url_for('products_by_category', category=selected_category|urlencode, page=page_num) }}" 
+                               class="page-btn {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+                        {% elif search_query %}
+                            <a href="{{ url_for('products', query=search_query, page=page_num) }}" 
+                               class="page-btn {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+                        {% else %}
+                            <a href="{{ url_for('products', page=page_num) }}" 
+                               class="page-btn {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if current_page < total_pages %}
+                    {% if selected_brand and selected_category %}
+                        <a href="{{ url_for('products_by_brand', brand=selected_brand) }}?category={{ selected_category|urlencode }}&page={{ current_page+1 }}" class="page-btn next">Next &raquo;</a>
+                    {% elif selected_brand %}
+                        <a href="{{ url_for('products_by_brand', brand=selected_brand, page=current_page+1) }}" class="page-btn next">Next &raquo;</a>
+                    {% elif selected_category %}
+                        <a href="{{ url_for('products_by_category', category=selected_category|urlencode, page=current_page+1) }}" class="page-btn next">Next &raquo;</a>
+                    {% elif search_query %}
+                        <a href="{{ url_for('products', query=search_query, page=current_page+1) }}" class="page-btn next">Next &raquo;</a>
+                    {% else %}
+                        <a href="{{ url_for('products', page=current_page+1) }}" class="page-btn next">Next &raquo;</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="no-products">
+                {% if selected_brand and selected_category %}
+                    <p>No products available for {{ selected_brand }} in {{ selected_category }}.</p>
+                {% elif selected_brand %}
+                    <p>No products available for {{ selected_brand }}.</p>
+                {% elif selected_category %}
+                    <p>No products available in {{ selected_category }}.</p>
+                {% elif search_query %}
+                    <p>No products found matching "{{ search_query }}".</p>
+                {% else %}
+                    <p>No products available yet.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+<style>
+    .filter-link {
+        display: block;
+        padding: 8px 12px;
+        color: #666;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-link:hover {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    .filter-link.active {
+        background-color: #333;
+        color: white;
+    }
+
+    .brand-title {
+        grid-column: 1 / -1;
+        margin-bottom: 2rem;
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .products-grid {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        padding: 0 2rem;
+    }
+
+    .products-container {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(280px, 300px));
+        gap: 2rem;
+        justify-content: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .product-card {
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        height: 400px;
+        border: 1px solid #eee;
+        position: relative;
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+        margin-bottom: 1rem;
+    }
+
+    .product-info {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .product-name {
+        font-size: 1rem;
+        color: #333;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        max-height: 2.4em;
+        margin: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    .product-info .price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        padding: 0.25rem 0.5rem;
+        position: absolute;
+        bottom: 1rem;
+        left: 0;
+        right: 0;
+        text-align: center;
+        background: white;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 3rem;
+        gap: 1rem;
+    }
+
+    .page-numbers {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .page-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        background: white;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .page-btn:hover {
+        background-color: #f5f5f5;
+    }
+
+    .page-btn.active {
+        background-color: #333;
+        color: white;
+        border-color: #333;
+    }
+
+    .page-btn.prev,
+    .page-btn.next {
+        background-color: #333;
+        color: white;
+        border-color: #333;
+    }
+
+    .page-btn.prev:hover,
+    .page-btn.next:hover {
+        background-color: #222;
+    }
+
+    @media (max-width: 1200px) {
+        .products-container {
+            grid-template-columns: repeat(3, minmax(250px, 280px));
+            gap: 1.5rem;
+        }
+        .product-card {
+            height: 380px;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .products-container {
+            grid-template-columns: repeat(2, minmax(240px, 280px));
+        }
+        .product-card {
+            height: 360px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .products-container {
+            grid-template-columns: minmax(200px, 280px);
+        }
+        .product-card {
+            min-height: 200px;
+            height: auto;
+        }
+        .products-grid {
+            padding: 0 1rem;
+        }
+        .pagination {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .page-numbers {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+
+    /* Mobile Brand Filter Styles */
+    .mobile-brand-filter {
+        display: none;
+    }
+    .brand-dropdown {
+        display: none;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #ccc;
+        margin-top: 8px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 10;
+        position: relative;
+    }
+    .brand-dropdown.active {
+        display: flex;
+    }
+    #brandFilterBtn {
+        width: 100%;
+        padding: 10px 0;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        .mobile-brand-filter {
+            display: block;
+        }
+        .desktop-brand-list {
+            display: none !important;
+        }
+    }
+    @media (min-width: 769px) {
+        .mobile-brand-filter {
+            display: none !important;
+        }
+        .desktop-brand-list {
+            display: block;
+        }
+    }
+
+    /* Mobile Category Filter Styles */
+    .mobile-category-filter {
+        display: none;
+    }
+    .category-dropdown {
+        display: none;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #ccc;
+        margin-top: 8px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 10;
+        position: relative;
+    }
+    .category-dropdown.active {
+        display: flex;
+    }
+    #categoryFilterBtn {
+        width: 100%;
+        padding: 10px 0;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        .mobile-category-filter {
+            display: block;
+        }
+        .desktop-category-list {
+            display: none !important;
+        }
+    }
+    @media (min-width: 769px) {
+        .mobile-category-filter {
+            display: none !important;
+        }
+        .desktop-category-list {
+            display: block;
+        }
+    }
+</style>
+<script>
+// Mobile brand filter dropdown toggle
+window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('brandFilterBtn');
+    var dropdown = document.getElementById('brandDropdown');
+    if (btn && dropdown) {
+        btn.addEventListener('click', function() {
+            dropdown.classList.toggle('active');
+        });
+        // Optional: close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    }
+});
+
+// Mobile category filter dropdown toggle
+window.addEventListener('DOMContentLoaded', function() {
+    var catBtn = document.getElementById('categoryFilterBtn');
+    var catDropdown = document.getElementById('categoryDropdown');
+    if (catBtn && catDropdown) {
+        catBtn.addEventListener('click', function() {
+            catDropdown.classList.toggle('active');
+        });
+        // Optional: close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!catBtn.contains(e.target) && !catDropdown.contains(e.target)) {
+                catDropdown.classList.remove('active');
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 
